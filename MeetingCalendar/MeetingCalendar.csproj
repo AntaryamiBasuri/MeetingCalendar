@@ -31,7 +31,7 @@ This library includes a meeting calendar class having:
       •  Unit tested code with code coverage above 99%
 
 Version 2.5
-      •  MoveForward and MoveBackward methods added to shift the time frame of the Meeting Calendar
+      •  MoveForward and MoveBackward methods added with ICalendar to shift the time frame
       •  RemoveAttendee method added with ICalendar to remove attendees from read-only collection
       •  Obsolete marked older overloaded constructors of Attendee, MeetingDetails removed
 

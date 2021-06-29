@@ -696,5 +696,31 @@ namespace MeetingCalendar.Tests
 			Assert.That(meetingCalendar.StartTime, Is.EqualTo(calendarStartTime.CalibrateToMinutes().AddMinutes(-1 * meetingCalendar.GetDuration())));
 			Assert.That(meetingCalendar.EndTime, Is.EqualTo(calendarStartTime.CalibrateToMinutes()));
 		}
+
+		[Test]
+		public void Deconstruct_Using_Name_EmailId_Returns_False_When_No_Matching_Attendee_Found()
+		{
+			var calendarStartTime = DateTime.Now;
+			var calendarEndTime = calendarStartTime.AddHours(8);
+			var meetings = new List<IMeetingInfo>
+			{
+				new MeetingInfo(calendarStartTime.AddHours(-2), calendarStartTime.AddHours(-1)),
+				new MeetingInfo(calendarEndTime.AddHours(1), calendarEndTime.AddHours(2))
+			};
+			const string attendeeName = "John Doe";
+			const string attendeeEmailId = "JohnDoe@test.com";
+			var calendarAttendees = new List<IAttendee> {  new Attendee(attendeeName, attendeeEmailId, "", false, meetings)};
+			var meetingCalendar = new Calendar(calendarStartTime, calendarEndTime, calendarAttendees );
+
+			var (startTime, endTime, currentTime, calendarWindowInMinutes, attendees) = meetingCalendar;
+
+			Assert.That(currentTime, Is.EqualTo(DateTime.Now.CalibrateToMinutes()));
+			Assert.That(startTime, Is.EqualTo(calendarStartTime.CalibrateToMinutes()));
+			Assert.That(endTime, Is.EqualTo(calendarEndTime.CalibrateToMinutes()));
+			Assert.That(calendarWindowInMinutes, Is.EqualTo(calendarEndTime.Subtract(calendarStartTime).TotalMinutes));
+			Assert.That(attendees.Count, Is.EqualTo(calendarAttendees.Count));
+			Assert.That(attendees.First().Equals(calendarAttendees.First()), Is.True);
+			Assert.That(attendees.First().Meetings.Count, Is.EqualTo(calendarAttendees.First().Meetings.Count));
+		}
 	}
 }
