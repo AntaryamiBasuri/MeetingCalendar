@@ -9,6 +9,7 @@
 		/// Available.
 		/// </summary>
 		Available,
+
 		/// <summary>
 		///  Scheduled.
 		/// </summary>

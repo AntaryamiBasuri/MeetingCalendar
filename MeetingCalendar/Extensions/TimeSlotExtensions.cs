@@ -82,7 +82,7 @@ namespace MeetingCalendar.Extensions
 			var temp = (seriesStartTime == default) ? timeSlot.StartTime : seriesStartTime;
 			while (temp < timeSlot.EndTime)
 			{
-				timeRange.TryAdd(temp, AvailabilityTypes.Available);
+				timeRange.Add(temp, AvailabilityTypes.Available);
 				temp = temp.AddMinutes(1);
 			}
 

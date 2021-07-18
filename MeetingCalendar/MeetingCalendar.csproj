@@ -4,7 +4,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <Features>strict</Features>
     <Description>A package that can provide information about available appointment slots within a specific time duration for zero or more attendees.</Description>
-    <Version>2.5.0.0</Version>
+    <Version>2.6.0.0</Version>
     <Company />
     <PackageProjectUrl>https://github.com/AntaryamiBasuri/MeetingCalendar</PackageProjectUrl>
     <RepositoryUrl>https://github.com/AntaryamiBasuri/MeetingCalendar</RepositoryUrl>
@@ -22,13 +22,18 @@ This library includes a meeting calendar class having:
       •  A method to get the list of attendees from the Meeting Calendar
       •  A method to add a list of attendees to the Meeting Calendar
       •  A method to append additional attendees to the Meeting Calendar
+      •  A method to find all available meeting slots
       •  Overloaded methods of RemoveAttendee to remove attendee(s) from the Meeting Calendar
       •  Overloaded methods to find an available time slot for a given duration, within a given time frame
-      •  A method to find all available meeting slots
-      •  MoveBack and MoveNext methods to shift the time frame of the Meeting Calendar
+      •  Overloaded MoveForward and MoveBackward methods to shift the time frame of the Calendar
       •  Overloaded Deconstructors for the Meeting Calendar
       •  Documented code
       •  Unit tested code with code coverage above 99%
+
+If you want to share feedback and feature requests to help improve the library, you are most welcome to do so!!!
+
+Version 2.6
+      •  Overloaded MoveForward and MoveBackward methods added to Meeting Calendar
 
 Version 2.5
       •  MoveForward and MoveBackward methods added with ICalendar to shift the time frame
@@ -66,12 +71,12 @@ Version 1.0
       •  FindFirstAvailableSlot - Overloaded methods to find an available time slot for a given duration
 
 Version 0.x.0
-       •  Written from ground up using .NETStandard 2.1
+       •  Written from ground up using .NETStandard
        •  No external dependencies
 
     </PackageReleaseNotes>
-    <AssemblyVersion>2.5.0.0</AssemblyVersion>
-    <FileVersion>2.5.0.0</FileVersion>
+    <AssemblyVersion>2.6.0.0</AssemblyVersion>
+    <FileVersion>2.6.0.0</FileVersion>
     <PackageId>MeetingCalendar</PackageId>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>

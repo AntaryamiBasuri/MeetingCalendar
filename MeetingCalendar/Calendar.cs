@@ -48,7 +48,7 @@ namespace MeetingCalendar
 		/// <summary>
 		/// Gets the <see cref="Calendar"/> time frame in minutes.
 		/// </summary>
-		public double CalendarWindowInMinutes => _endTime.Subtract(_startTime).TotalMinutes;
+		public double CalendarWindowInMinutes => this.GetDuration();
 
 		/// <summary>
 		/// Gets the list of <see cref="IAttendee"/>.
@@ -219,10 +219,7 @@ namespace MeetingCalendar
 		/// </exception>
 		/// <returns>A an instance of <see cref="ITimeSlot"/> or null.</returns>
 		public ITimeSlot FindFirstAvailableSlot(int meetingDuration, ITimeSlot timeSlot)
-		{
-			var (fromTime, toTime) = timeSlot;
-			return FindFirstAvailableSlot(meetingDuration, fromTime, toTime);
-		}
+			=> FindFirstAvailableSlot(meetingDuration, timeSlot.StartTime, timeSlot.EndTime);
 
 		/// <summary>
 		/// Finds the first available time slot for the requested meeting duration, optionally within a specific time frame.
@@ -271,8 +268,7 @@ namespace MeetingCalendar
 
 			var meetingHoursByMinutes =
 				this.GetTimeSeriesByMinutes(TimeSlotComputationStartTime)
-					.FillWith(AvailabilityTypes.Available)
-					.ToConcurrentDictionary();
+					.FillWith(AvailabilityTypes.Available);
 
 			if (Attendees != null && Attendees.Any())
 			{
@@ -288,16 +284,47 @@ namespace MeetingCalendar
 		}
 
 		/// <summary>
-		/// Moves backward the <see cref="ITimeFrame"/> window of the <see cref="Calendar"/>.
+		/// Moves forward the <see cref="ITimeFrame"/> window of the <see cref="Calendar"/>.
 		/// </summary>
-		/// <param name="isClearAttendees">
+		/// <param name="clearAttendees">
 		/// Clears the list of attendees, if <c>true</c>; otherwise, <c>false</c>. The default is <c>true</c>.
 		/// </param>
-		public void MoveBackward(bool isClearAttendees = true)
+		public void MoveForward(bool clearAttendees = true)
 		{
 			var duration = CalendarWindowInMinutes;
 
-			if (isClearAttendees)
+			if (clearAttendees)
+			{
+				_attendees.Clear();
+			}
+
+			_startTime = _endTime;
+			_endTime = _endTime.AddMinutes(duration);
+		}
+
+		/// <summary>
+		/// Moves forward the <see cref="ITimeFrame"/> window of the <see cref="Calendar"/>.
+		/// </summary>
+		/// <param name="attendees">
+		/// Replaces existing attendees with the specified list of attendees.
+		/// </param>
+		public void MoveForward(ICollection<IAttendee> attendees)
+		{
+			MoveForward();
+			AddAttendees(attendees);
+		}
+
+		/// <summary>
+		/// Moves backward the <see cref="ITimeFrame"/> window of the <see cref="Calendar"/>.
+		/// </summary>
+		/// <param name="clearAttendees">
+		/// Clears the list of attendees, if <c>true</c>; otherwise, <c>false</c>. The default is <c>true</c>.
+		/// </param>
+		public void MoveBackward(bool clearAttendees = true)
+		{
+			var duration = CalendarWindowInMinutes;
+
+			if (clearAttendees)
 			{
 				_attendees.Clear();
 			}
@@ -307,22 +334,15 @@ namespace MeetingCalendar
 		}
 
 		/// <summary>
-		/// Moves forward the <see cref="ITimeFrame"/> window of the <see cref="Calendar"/>.
+		/// Moves backward the <see cref="ITimeFrame"/> window of the <see cref="Calendar"/>.
 		/// </summary>
-		/// <param name="isClearAttendees">
-		/// Clears the list of attendees, if <c>true</c>; otherwise, <c>false</c>. The default is <c>true</c>.
+		/// <param name="attendees">
+		/// Replaces existing attendees with the specified list of attendees.
 		/// </param>
-		public void MoveForward(bool isClearAttendees = true)
+		public void MoveBackward(ICollection<IAttendee> attendees)
 		{
-			var duration = CalendarWindowInMinutes;
-
-			if (isClearAttendees)
-			{
-				_attendees.Clear();
-			}
-
-			_startTime = _endTime;
-			_endTime = _endTime.AddMinutes(duration);
+			MoveBackward();
+			AddAttendees(attendees);
 		}
 
 		/// <summary>
@@ -388,12 +408,11 @@ namespace MeetingCalendar
 			}
 		}
 
-		private ICollection<ITimeSlot> GetAvailability(ICollection<ITimeSlot> availableMeetingSlots,
-			ConcurrentDictionary<DateTime, AvailabilityTypes> meetingHoursByMinutes)
+		private ICollection<ITimeSlot> GetAvailability(ICollection<ITimeSlot> availableMeetingSlots, IDictionary<DateTime, AvailabilityTypes> meetingHoursByMinutes)
 		{
 			var updatedMeetingHoursByMinutes = Attendees.Count <= 8 && CalendarWindowInMinutes <= 960
 				? GetAllAvailableTimeSlots(meetingHoursByMinutes)
-				: GetAllAvailableTimeSlotsAsParallel(meetingHoursByMinutes);
+				: GetAllAvailableTimeSlotsAsParallel(meetingHoursByMinutes.ToConcurrentDictionary());
 
 			if (updatedMeetingHoursByMinutes.Any(i => i.Value == AvailabilityTypes.Available))
 			{
@@ -417,8 +436,8 @@ namespace MeetingCalendar
 							.FillWith(AvailabilityTypes.Scheduled)
 							.ForEach(item =>
 							{
-								if (meetingHoursByMinutes.TryGetValue(item.Key, out var prevValue) &&
-									prevValue == AvailabilityTypes.Available)
+								if (meetingHoursByMinutes.TryGetValue(item.Key, out var previousValue) &&
+									previousValue == AvailabilityTypes.Available)
 								{
 									meetingHoursByMinutes[item.Key] = AvailabilityTypes.Scheduled;
 								}
@@ -442,8 +461,7 @@ namespace MeetingCalendar
 						.FillWith(AvailabilityTypes.Scheduled)
 						.AsParallel()
 						.ForAll(item =>
-							meetingHoursByMinutes.TryUpdate(item.Key, AvailabilityTypes.Scheduled,
-								AvailabilityTypes.Available))));
+							meetingHoursByMinutes.TryUpdate(item.Key, AvailabilityTypes.Scheduled, AvailabilityTypes.Available))));
 
 			return meetingHoursByMinutes;
 		}
@@ -467,7 +485,7 @@ namespace MeetingCalendar
 				meetingDuration > toTime.CalibrateToMinutes().Subtract(fromTime.CalibrateToMinutes()).TotalMinutes)
 			{
 				throw new ArgumentException(
-					"The meeting duration can not be longer than the search range.Consider to increase the search range.",
+					"The meeting duration can not be longer than the search range. Consider to increase the search range.",
 					nameof(meetingDuration));
 			}
 

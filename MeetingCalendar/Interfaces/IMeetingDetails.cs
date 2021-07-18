@@ -25,7 +25,7 @@ namespace MeetingCalendar.Interfaces
 		/// <summary>
 		/// Gets the location/venue of the <see cref="IMeetingDetails"/>.
 		/// </summary>
-		public string MeetingLocation { get; }
+		string MeetingLocation { get; }
 
 		/// <summary>
 		/// Gets a list of Attendees associated with the <see cref="IMeetingDetails"/>.

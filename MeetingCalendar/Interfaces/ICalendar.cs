@@ -84,7 +84,7 @@ namespace MeetingCalendar.Interfaces
 		/// The search range upper bound is less than the lower bound time.
 		/// </exception>
 		/// <returns>A an instance of <see cref="ITimeSlot"/> or null.</returns>
-		public ITimeSlot FindFirstAvailableSlot(int meetingDuration, ITimeSlot timeSlot);
+		ITimeSlot FindFirstAvailableSlot(int meetingDuration, ITimeSlot timeSlot);
 
 		/// <summary>
 		/// Finds the first available time slot for the requested meeting duration within a specific time frame.
